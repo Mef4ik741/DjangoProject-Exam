@@ -48,25 +48,6 @@ for name in categories:
 python manage.py runserver
 ```
 
-## Развёртывание на Railway
-
-1. Установите переменную окружения:
-   ```
-   USE_POSTGRES=1
-   ```
-
-2. Railway использует предоставленные PostgreSQL credentials:
-   - Host: postgres.railway.internal
-   - Port: 5432
-   - Database: railway
-   - User: postgres
-   - Password: niNTUMFHhxpojeprqrstKEpKXWlTvzVu
-
-3. Для медиа-файлов используется Cloudinary:
-   - Cloud Name: duygiwcsz
-   - API Key: 149696794782919
-   - API Secret: DlKE6PeZb9oCXAqAFPndLYTuFvQ
-
 ## Данные для входа
 
 **Super Admin:**
