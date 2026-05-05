@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Модерация статей{% endblock %}
+
+{% block content %}
+    <h1 style="margin-bottom: 20px; font-size: 24px; color: #222;">Модерация статей</h1>
+    {% for article in articles %}
+        <article class="card">
+            <div class="card-body">
+                <h2 class="card-title"><a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a></h2>
+                <div class="card-meta">
+                    <span class="author">
+                        <span class="author-avatar" style="width: 24px; height: 24px; font-size: 12px;">{{ article.author.username|first|upper }}</span>
+                        <a href="{% url 'profile_detail' article.author.pk %}">{{ article.author.username }}</a>
+                    </span>
+                    <span>{{ article.created_at|date:"d.m.Y H:i" }}</span>
+                    <span class="badge badge-success">{{ article.category.name }}</span>
+                </div>
+                <p class="card-text">{{ article.content|truncatewords:40 }}</p>
+            </div>
+            <div class="card-footer">
+                <form method="post" action="{% url 'approve_article' article.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="padding: 4px 12px;">Опубликовать</button>
+                </form>
+                <form method="post" action="{% url 'reject_article' article.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="padding: 4px 12px;">Отклонить</button>
+                </form>
+                <a href="{% url 'article_edit' article.pk %}" class="btn btn-secondary" style="padding: 4px 12px;">Редактировать</a>
+            </div>
+        </article>
+    {% empty %}
+        <div class="card">
+            <div class="card-body">
+                <p>Нет статей на модерации.</p>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

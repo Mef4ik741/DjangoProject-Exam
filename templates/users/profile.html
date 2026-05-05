@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.username }} - Профиль{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                <div class="author-avatar" style="width: 64px; height: 64px; font-size: 24px;">{{ profile_user.username|first|upper }}</div>
+                <div>
+                    <h1 style="font-size: 24px; margin-bottom: 4px;">{{ profile_user.username }}</h1>
+                    <p style="color: #777; font-size: 14px;">
+                        {% if profile_user.role == 'superadmin' %}Супер Админ{% elif profile_user.role == 'admin' %}Админ{% else %}Пользователь{% endif %}
+                        {% if profile_user.is_banned %}<span class="badge badge-danger">Забанен</span>{% endif %}
+                    </p>
+                    {% if profile_user.bio %}
+                        <p style="font-size: 14px; color: #555;">{{ profile_user.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if user.can_ban_users and user != profile_user %}
+                <div style="margin-bottom: 20px;">
+                    {% if profile_user.is_banned %}
+                        <a href="{% url 'unban_user' profile_user.pk %}" class="btn btn-primary">Разбанить</a>
+                    {% else %}
+                        <a href="{% url 'ban_user' profile_user.pk %}" class="btn btn-danger">Забанить</a>
+                    {% endif %}
+                    {% if user.can_assign_admins and profile_user.role == 'user' %}
+                        <a href="{% url 'promote_user' profile_user.pk %}" class="btn btn-secondary">Назначить админом</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <h2 style="margin: 20px 0; font-size: 20px;">Статьи пользователя</h2>
+    {% for article in articles %}
+        <article class="card">
+            <div class="card-body">
+                <h3 class="card-title"><a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a></h3>
+                <div class="card-meta">
+                    <span>{{ article.created_at|date:"d.m.Y H:i" }}</span>
+                    <span class="badge badge-success">{{ article.category.name }}</span>
+                    <span>Рейтинг: {{ article.rating_avg|default:"—" }}</span>
+                </div>
+                <p class="card-text">{{ article.content|truncatewords:30 }}</p>
+            </div>
+        </article>
+    {% empty %}
+        <div class="card">
+            <div class="card-body">
+                <p>Нет опубликованных статей.</p>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if user == profile_user %}
+        <h2 style="margin: 20px 0; font-size: 20px;">Закладки</h2>
+        {% for bm in bookmarks %}
+            <article class="card">
+                <div class="card-body">
+                    <h3 class="card-title"><a href="{% url 'article_detail' bm.article.pk %}">{{ bm.article.title }}</a></h3>
+                    <div class="card-meta">
+                        <span>{{ bm.article.created_at|date:"d.m.Y H:i" }}</span>
+                        <span class="badge badge-success">{{ bm.article.category.name }}</span>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="card">
+                <div class="card-body">
+                    <p>Нет закладок.</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

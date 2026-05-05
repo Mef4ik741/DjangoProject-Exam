@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if article %}Редактировать статью{% else %}Новая статья{% endif %}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title">{% if article %}Редактировать статью{% else %}Новая статья{% endif %}</h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="message error">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: #d9534f; font-size: 13px; margin-top: 4px;">{{ field.errors }}</div>
+                        {% endif %}
+                        {% if field.name == 'image' and article and article.image %}
+                            <p style="margin-top: 8px;">Текущее: <a href="{{ article.image.url }}" target="_blank">{{ article.image.name }}</a></p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">{% if article %}Сохранить{% else %}Отправить на модерацию{% endif %}</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

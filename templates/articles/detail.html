@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.title }} - Новостной сайт{% endblock %}
+
+{% block content %}
+    <div class="article-header">
+        <h1 class="article-title">{{ article.title }}</h1>
+        <div class="article-meta">
+            <span class="author">
+                <span class="author-avatar">{{ article.author.username|first|upper }}</span>
+                <a href="{% url 'profile_detail' article.author.pk %}">{{ article.author.username }}</a>
+            </span>
+            <span>{{ article.created_at|date:"d.m.Y H:i" }}</span>
+            <span class="badge badge-success">{{ article.category.name }}</span>
+            <span>Статус: 
+                {% if article.status == 'published' %}
+                    <span class="badge badge-success">Опубликовано</span>
+                {% elif article.status == 'pending' %}
+                    <span class="badge badge-warning">На модерации</span>
+                {% elif article.status == 'rejected' %}
+                    <span class="badge badge-danger">Отклонено</span>
+                {% else %}
+                    <span class="badge badge-secondary">Черновик</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    {% if article.image %}
+        <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-image">
+    {% endif %}
+
+    <div class="article-content">
+        {{ article.content|linebreaks }}
+    </div>
+
+    <div class="article-actions">
+        <div>
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'rate_article' article.pk %}" class="rating-form" style="display: inline;">
+                    {% csrf_token %}
+                    <label for="rating">Оценка:</label>
+                    <select name="value" id="rating">
+                        <option value="1" {% if user_rating == 1 %}selected{% endif %}>1</option>
+                        <option value="2" {% if user_rating == 2 %}selected{% endif %}>2</option>
+                        <option value="3" {% if user_rating == 3 %}selected{% endif %}>3</option>
+                        <option value="4" {% if user_rating == 4 %}selected{% endif %}>4</option>
+                        <option value="5" {% if user_rating == 5 %}selected{% endif %}>5</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary" style="padding: 4px 12px;">Оценить</button>
+                </form>
+                <form method="post" action="{% url 'toggle_bookmark' article.pk %}" style="display: inline; margin-left: 12px;">
+                    {% csrf_token %}
+                    {% if is_bookmarked %}
+                        <button type="submit" class="btn btn-outline">Убрать из закладок</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary">В закладки</button>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+        <div>
+            {% if user == article.author or user.can_moderate_articles %}
+                <a href="{% url 'article_edit' article.pk %}" class="btn btn-secondary">Редактировать</a>
+                <a href="{% url 'article_delete' article.pk %}" class="btn btn-danger">Удалить</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Авторы{% endblock %}
+
+{% block content %}
+    <h1 style="margin-bottom: 20px; font-size: 24px; color: #222;">Авторы</h1>
+    <div class="users-grid">
+        {% for author in authors %}
+            <div class="user-card">
+                <div class="user-card-avatar">{{ author.username|first|upper }}</div>
+                <div class="user-card-name">
+                    <a href="{% url 'profile_detail' author.pk %}">{{ author.username }}</a>
+                </div>
+                <div class="user-card-role">
+                    {% if author.role == 'superadmin' %}Супер Админ{% elif author.role == 'admin' %}Админ{% else %}Пользователь{% endif %}
+                </div>
+                <div style="font-size: 13px; color: #777;">
+                    Статей: {{ author.articles.count }}
+                </div>
+            </div>
+        {% empty %}
+            <div class="card">
+                <div class="card-body">
+                    <p>Авторы не найдены.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
