@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Хабр-подобный сайт{% endblock %}</title>
+    <title>{% block title %}Хабр{% endblock %}</title>
     <style>
         * {
             margin: 0;
@@ -33,12 +33,13 @@
         }
         /* Header */
         .header {
-            background-color: #303030;
-            color: #fff;
+            background-color: #fff;
+            color: #333;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border-bottom: 1px solid #e8e8e8;
         }
         .header-inner {
             display: flex;
@@ -47,9 +48,11 @@
             height: 56px;
         }
         .logo {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 26px;
+            font-weight: 900;
             color: #77bb11;
+            letter-spacing: -0.5px;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
         .nav {
             display: flex;
@@ -57,12 +60,13 @@
             align-items: center;
         }
         .nav a {
-            color: #ccc;
+            color: #555;
             font-size: 14px;
             transition: color 0.2s;
+            font-weight: 500;
         }
         .nav a:hover {
-            color: #fff;
+            color: #77bb11;
         }
         .nav a.active {
             color: #77bb11;
@@ -372,9 +376,10 @@
         }
         /* Footer */
         .footer {
-            background-color: #282828;
-            color: #aaa;
+            background-color: #f9f9f9;
+            color: #666;
             font-size: 14px;
+            border-top: 1px solid #e8e8e8;
         }
         .footer-inner {
             display: grid;
@@ -383,7 +388,7 @@
             padding: 40px 0;
         }
         .footer-column h3 {
-            color: #fff;
+            color: #222;
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 16px;
@@ -395,7 +400,7 @@
             margin-bottom: 10px;
         }
         .footer-column a {
-            color: #aaa;
+            color: #666;
             font-size: 14px;
             transition: color 0.2s;
         }
@@ -403,7 +408,7 @@
             color: #77bb11;
         }
         .footer-bottom {
-            border-top: 1px solid #404040;
+            border-top: 1px solid #e8e8e8;
             padding: 20px 0;
             display: flex;
             justify-content: space-between;
@@ -412,7 +417,7 @@
             gap: 12px;
         }
         .footer-bottom .copy {
-            color: #888;
+            color: #999;
             font-size: 13px;
         }
         .footer-bottom .footer-links {
@@ -420,7 +425,7 @@
             gap: 20px;
         }
         .footer-bottom .footer-links a {
-            color: #888;
+            color: #999;
             font-size: 13px;
         }
         .footer-bottom .footer-links a:hover {
@@ -496,7 +501,7 @@
 <body>
     <header class="header">
         <div class="container header-inner">
-            <a href="{% url 'home' %}" class="logo">Новости</a>
+            <a href="{% url 'home' %}" class="logo">Хабр</a>
             <nav class="nav">
                 <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Статьи</a>
                 <a href="{% url 'popular' %}" class="{% if request.resolver_match.url_name == 'popular' %}active{% endif %}">Популярное</a>
@@ -552,7 +557,7 @@
     <footer class="footer">
         <div class="container footer-inner">
             <div class="footer-column">
-                <h3>Новостной сайт</h3>
+                <h3>Хабр</h3>
                 <ul>
                     <li><a href="{% url 'home' %}">Главная</a></li>
                     <li><a href="{% url 'popular' %}">Популярное</a></li>
@@ -584,7 +589,7 @@
             </div>
         </div>
         <div class="container footer-bottom">
-            <div class="copy">&copy; 2026 Новостной сайт. Все права защищены.</div>
+            <div class="copy">&copy; 2026 Хабр. Все права защищены.</div>
             <div class="footer-links">
                 <a href="{% url 'home' %}">Главная</a>
                 <a href="{% url 'authors' %}">Авторы</a>
