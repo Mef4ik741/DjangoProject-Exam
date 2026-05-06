@@ -58,6 +58,14 @@ class Article(models.Model):
             self.rating_avg = 0.0
         self.save(update_fields=['rating_avg'])
 
+    @property
+    def likes_count(self):
+        return self.likes_dislikes.filter(is_like=True).count()
+
+    @property
+    def dislikes_count(self):
+        return self.likes_dislikes.filter(is_like=False).count()
+
 
 class Rating(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='ratings')
@@ -72,6 +80,22 @@ class Rating(models.Model):
 
     def __str__(self):
         return f'{self.user.username} -> {self.article.title}: {self.value}'
+
+
+class LikeDislike(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='likes_dislikes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='likes_dislikes')
+    is_like = models.BooleanField()  # True = like, False = dislike
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('article', 'user')
+        verbose_name = 'Лайк/Дизлайк'
+        verbose_name_plural = 'Лайки/Дизлайки'
+
+    def __str__(self):
+        action = 'Лайк' if self.is_like else 'Дизлайк'
+        return f'{self.user.username} -> {self.article.title}: {action}'
 
 
 class Bookmark(models.Model):

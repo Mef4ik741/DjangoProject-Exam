@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Article, Rating, Bookmark
+from .models import Category, Article, Rating, Bookmark, LikeDislike
 
 
 @admin.register(Category)
@@ -26,3 +26,9 @@ class RatingAdmin(admin.ModelAdmin):
 class BookmarkAdmin(admin.ModelAdmin):
     list_display = ['article', 'user', 'created_at']
     list_filter = ['created_at']
+
+
+@admin.register(LikeDislike)
+class LikeDislikeAdmin(admin.ModelAdmin):
+    list_display = ['article', 'user', 'is_like', 'created_at']
+    list_filter = ['is_like', 'created_at']

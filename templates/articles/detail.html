@@ -37,17 +37,21 @@
     <div class="article-actions">
         <div>
             {% if user.is_authenticated %}
-                <form method="post" action="{% url 'rate_article' article.pk %}" class="rating-form" style="display: inline;">
+                <form method="post" action="{% url 'toggle_like' article.pk %}" style="display: inline-flex; align-items: center; gap: 4px;">
                     {% csrf_token %}
-                    <label for="rating">Оценка:</label>
-                    <select name="value" id="rating">
-                        <option value="1" {% if user_rating == 1 %}selected{% endif %}>1</option>
-                        <option value="2" {% if user_rating == 2 %}selected{% endif %}>2</option>
-                        <option value="3" {% if user_rating == 3 %}selected{% endif %}>3</option>
-                        <option value="4" {% if user_rating == 4 %}selected{% endif %}>4</option>
-                        <option value="5" {% if user_rating == 5 %}selected{% endif %}>5</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary" style="padding: 4px 12px;">Оценить</button>
+                    <input type="hidden" name="action" value="like">
+                    <button type="submit" class="btn {% if user_like == 'like' %}btn-primary{% else %}btn-outline{% endif %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                        <span>{{ article.likes_count }}</span>
+                    </button>
+                </form>
+                <form method="post" action="{% url 'toggle_like' article.pk %}" style="display: inline-flex; align-items: center; gap: 4px; margin-left: 4px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="dislike">
+                    <button type="submit" class="btn {% if user_like == 'dislike' %}btn-primary{% else %}btn-outline{% endif %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"></path><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                        <span>{{ article.dislikes_count }}</span>
+                    </button>
                 </form>
                 <form method="post" action="{% url 'toggle_bookmark' article.pk %}" style="display: inline; margin-left: 12px;">
                     {% csrf_token %}
@@ -57,6 +61,18 @@
                         <button type="submit" class="btn btn-primary">В закладки</button>
                     {% endif %}
                 </form>
+            {% else %}
+                <span style="color: #888; font-size: 14px;">
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                        {{ article.likes_count }}
+                    </span>
+                    <span style="margin: 0 8px;">|</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"></path><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                        {{ article.dislikes_count }}
+                    </span>
+                </span>
             {% endif %}
         </div>
         <div>

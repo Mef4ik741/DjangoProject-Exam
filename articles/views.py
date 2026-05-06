@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils.text import slugify
-from .models import Category, Article, Rating, Bookmark
+from django.db.models import Count, Q
+from .models import Category, Article, Rating, Bookmark, LikeDislike
 from .forms import ArticleForm
 from users.models import User
 
@@ -15,7 +16,10 @@ def _paginate(request, queryset, per_page=10):
 
 
 def home(request):
-    articles_list = Article.objects.filter(status='published').select_related('author', 'category')
+    articles_list = Article.objects.filter(status='published').select_related('author', 'category').annotate(
+        like_count=Count('likes_dislikes', filter=Q(likes_dislikes__is_like=True)),
+        dislike_count=Count('likes_dislikes', filter=Q(likes_dislikes__is_like=False)),
+    )
     articles = _paginate(request, articles_list)
     context = {
         'articles': articles,
@@ -25,7 +29,10 @@ def home(request):
 
 
 def popular(request):
-    articles_list = Article.objects.filter(status='published', rating_avg__gte=4).select_related('author', 'category')
+    articles_list = Article.objects.filter(status='published', rating_avg__gte=4).select_related('author', 'category').annotate(
+        like_count=Count('likes_dislikes', filter=Q(likes_dislikes__is_like=True)),
+        dislike_count=Count('likes_dislikes', filter=Q(likes_dislikes__is_like=False)),
+    )
     articles = _paginate(request, articles_list)
     context = {
         'articles': articles,
@@ -36,7 +43,10 @@ def popular(request):
 
 def category_articles(request, slug):
     category = get_object_or_404(Category, slug=slug)
-    articles_list = Article.objects.filter(status='published', category=category).select_related('author', 'category')
+    articles_list = Article.objects.filter(status='published', category=category).select_related('author', 'category').annotate(
+        like_count=Count('likes_dislikes', filter=Q(likes_dislikes__is_like=True)),
+        dislike_count=Count('likes_dislikes', filter=Q(likes_dislikes__is_like=False)),
+    )
     articles = _paginate(request, articles_list)
     context = {
         'articles': articles,
@@ -58,15 +68,20 @@ def article_detail(request, pk):
     article.save(update_fields=['views_count'])
     user_rating = None
     is_bookmarked = False
+    user_like = None
     if request.user.is_authenticated:
         rating_obj = Rating.objects.filter(article=article, user=request.user).first()
         if rating_obj:
             user_rating = rating_obj.value
         is_bookmarked = Bookmark.objects.filter(article=article, user=request.user).exists()
+        like_obj = LikeDislike.objects.filter(article=article, user=request.user).first()
+        if like_obj:
+            user_like = 'like' if like_obj.is_like else 'dislike'
     context = {
         'article': article,
         'user_rating': user_rating,
         'is_bookmarked': is_bookmarked,
+        'user_like': user_like,
     }
     return render(request, 'articles/detail.html', context)
 
@@ -137,20 +152,28 @@ def article_delete(request, pk):
 
 
 @login_required
-def rate_article(request, pk):
+def toggle_like(request, pk):
     article = get_object_or_404(Article, pk=pk)
     if request.user.is_banned:
         messages.error(request, 'Ваш аккаунт заблокирован')
         return redirect('article_detail', pk=pk)
-    value = request.POST.get('value')
-    if value and value.isdigit() and 1 <= int(value) <= 5:
-        Rating.objects.update_or_create(
-            article=article,
-            user=request.user,
-            defaults={'value': int(value)}
-        )
-        article.update_rating()
-        messages.success(request, 'Оценка сохранена')
+    action = request.POST.get('action')
+    if action not in ('like', 'dislike'):
+        return redirect('article_detail', pk=pk)
+    is_like = action == 'like'
+    existing = LikeDislike.objects.filter(article=article, user=request.user).first()
+    if existing:
+        if existing.is_like == is_like:
+            existing.delete()
+            msg = 'Лайк убран' if is_like else 'Дизлайк убран'
+        else:
+            existing.is_like = is_like
+            existing.save()
+            msg = 'Лайк добавлен' if is_like else 'Дизлайк добавлен'
+    else:
+        LikeDislike.objects.create(article=article, user=request.user, is_like=is_like)
+        msg = 'Лайк добавлен' if is_like else 'Дизлайк добавлен'
+    messages.success(request, msg)
     return redirect('article_detail', pk=pk)
 
 
